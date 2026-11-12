@@ -1,0 +1,6 @@
+{
+  "name": "GEO DEPTH",
+  "description": "Understand Earthquakes. Discover Their Impact. Stay Safe. Interactive scientific platform featuring real USGS earthquakes, Sentinel-1 InSAR satellite observations, tectonic physics, and practical safety guidance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
