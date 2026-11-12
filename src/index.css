@@ -26,3 +26,34 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
+
+/* Leaflet Container & Tooltip Styling */
+.leaflet-container {
+  background-color: #0f172a;
+  font-family: inherit;
+}
+.leaflet-tooltip.geo-depth-tooltip {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+}
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(255, 255, 255, 0.95);
+}
+.leaflet-control-attribution {
+  background: rgba(11, 14, 23, 0.85) !important;
+  color: #94a3b8 !important;
+  font-size: 10px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  border-top-left-radius: 6px;
+  padding: 2px 8px !important;
+}
+.leaflet-control-attribution a {
+  color: #38bdf8 !important;
+  text-decoration: none !important;
+}
+.leaflet-control-attribution a:hover {
+  text-decoration: underline !important;
+}

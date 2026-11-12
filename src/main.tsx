@@ -1,6 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import 'leaflet/dist/leaflet.css';
 
 // Tier 1: Maps JavaScript API & Map Loading Level quota handlers
 (window as unknown as { gm_authFailure: () => void }).gm_authFailure = () => {
