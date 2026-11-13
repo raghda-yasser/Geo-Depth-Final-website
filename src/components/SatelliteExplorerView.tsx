@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import {
   Radio,
-  Layers,
-  Activity,
   ExternalLink,
   ShieldAlert,
-  ChevronDown,
-  ChevronUp,
-  Compass,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  BookOpen,
+  Database
 } from 'lucide-react';
 import { INSAR_CASE_STUDIES } from '../data/insarStudies.ts';
+import { SAR_OFFICIAL_SOURCES, SAR_SOURCE_CATEGORIES } from '../data/sarSources.ts';
 
 export const SatelliteExplorerView: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string>(INSAR_CASE_STUDIES[0].id);
@@ -26,15 +24,15 @@ export const SatelliteExplorerView: React.FC = () => {
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider">
           <Radio className="w-3.5 h-3.5" />
-          <span>Orbital Radar Geodesy · Copernicus Sentinel-1</span>
+          <span>Orbital Radar Geodesy · Sentinel-1 · NISAR · SAOCOM · RADARSAT</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
           Satellite Radar Explorer
         </h1>
         <p className="text-slate-400 text-sm max-w-3xl leading-relaxed">
-          How radar satellites in low Earth orbit measure millimeter-to-centimeter ground deformation
-          following major earthquakes. Based on ESA Copernicus Sentinel-1 C-band SAR observations
-          and peer-reviewed geodetic modeling.
+          How C-band, L-band, and S-band radar satellites in low Earth orbit measure millimeter-to-centimeter
+          ground deformation following major earthquakes. Grounded in ESA Copernicus Sentinel-1,
+          NASA-ISRO NISAR, JPL UAVSAR, CSA RADARSAT, and CONAE SAOCOM science archives.
         </p>
       </div>
 
@@ -66,7 +64,7 @@ export const SatelliteExplorerView: React.FC = () => {
           </h3>
           <p className="text-xs text-slate-300 leading-relaxed">
             Interferometric SAR compares two radar acquisitions taken from the exact same orbital track
-            before and after an earthquake. By computing the phase difference ($\Delta\phi$),
+            before and after an earthquake. By computing the phase difference (Δφ),
             scientists detect crustal displacement with millimeter-scale sensitivity.
           </p>
         </div>
@@ -138,6 +136,45 @@ export const SatelliteExplorerView: React.FC = () => {
               Phase-unwrapped and georeferenced line-of-sight (LOS) deformation field, calibrated
               against GNSS ground stations.
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Multi-Mission Radar Wavelengths: C-Band vs L-Band & S-Band */}
+      <div className="p-5 bg-[#0b0e17] border border-slate-800 rounded-xl space-y-4">
+        <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-semibold uppercase tracking-wider">
+          <Database className="w-4 h-4" />
+          <span>Global SAR Fleet: Why Radar Wavelength Matters</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="p-4 bg-slate-900/70 border border-slate-800 rounded-lg space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-100">
+                C-Band SAR (~5.55 cm wavelength)
+              </h3>
+              <span className="font-mono text-[11px] text-cyan-400">2.8 cm / fringe</span>
+            </div>
+            <p className="text-slate-300 leading-relaxed">
+              Operated by <strong>ESA Copernicus Sentinel-1</strong> and the{' '}
+              <strong>Canadian Space Agency (RADARSAT Constellation Mission &amp; RADARSAT-1)</strong>.
+              Short ~5.6 cm microwaves deliver high sensitivity to small crustal motion and urban
+              building damage, though dense forests can cause signal decorrelation.
+            </p>
+          </div>
+
+          <div className="p-4 bg-slate-900/70 border border-slate-800 rounded-lg space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-100">
+                L-Band &amp; S-Band SAR (~24 cm / ~9.4 cm)
+              </h3>
+              <span className="font-mono text-[11px] text-amber-400">~12 cm / fringe (L)</span>
+            </div>
+            <p className="text-slate-300 leading-relaxed">
+              Operated by <strong>CONAE SAOCOM-1A/1B</strong>, <strong>NASA JPL UAVSAR</strong>, and
+              the dual-frequency <strong>NASA-ISRO NISAR</strong> mission. Longer L-band waves
+              penetrate vegetation canopies and measure large fault displacements without phase
+              aliasing across steep rupture gradients.
+            </p>
           </div>
         </div>
       </div>
@@ -305,6 +342,70 @@ export const SatelliteExplorerView: React.FC = () => {
               Access Verified Copernicus Products <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
+        </div>
+      </div>
+
+      {/* H. Sources — Official SAR Portals, Missions & Training */}
+      <div className="space-y-5 pt-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider font-semibold">
+            <BookOpen className="w-4 h-4" />
+            <span>H. Sources · Official Archives &amp; Educational Portals</span>
+          </div>
+          <h2 className="text-lg font-bold text-slate-100">
+            Verified Space Agency SAR Data Portals &amp; Tutorials
+          </h2>
+          <p className="text-xs text-slate-400 max-w-3xl">
+            Explore primary open-access satellite radar archives, mission documentation, and
+            open-source SAR curricula maintained by NASA, ASF, ISRO, JPL, the Canadian Space Agency
+            (CSA), and Argentina’s CONAE.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {SAR_SOURCE_CATEGORIES.map((cat) => {
+            const items = SAR_OFFICIAL_SOURCES.filter((s) => s.category === cat.id);
+            return (
+              <div
+                key={cat.id}
+                className="bg-[#0b0e17] border border-slate-800 rounded-xl p-5 space-y-3"
+              >
+                <div className="border-b border-slate-800 pb-2.5">
+                  <h3 className="text-sm font-bold text-slate-100 font-mono">{cat.label}</h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{cat.subtitle}</p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {items.map((src) => (
+                    <a
+                      key={src.url}
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block p-3 bg-slate-900/70 hover:bg-slate-900 border border-slate-800/90 hover:border-cyan-500/50 rounded-lg transition-colors group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="text-xs font-semibold text-slate-100 group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
+                            <span>{src.title}</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono text-slate-400">
+                            <span className="text-cyan-400">{src.agency}</span>
+                            <span>·</span>
+                            <span>{src.bandOrFocus}</span>
+                          </div>
+                        </div>
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400 shrink-0 mt-0.5" />
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed mt-1.5">
+                        {src.description}
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

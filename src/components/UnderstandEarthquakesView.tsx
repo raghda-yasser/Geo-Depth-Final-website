@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import {
   Layers,
   Activity,
-  Radio,
   ChevronDown,
   ChevronUp,
-  AlertTriangle,
-  ArrowRight,
   ShieldCheck,
-  Compass
+  Compass,
+  ExternalLink,
+  BookOpen
 } from 'lucide-react';
 import { ThreeFaultViewer } from './ThreeFaultViewer.tsx';
+import { SAR_OFFICIAL_SOURCES } from '../data/sarSources.ts';
 
 export const UnderstandEarthquakesView: React.FC = () => {
   const [openLearnMore, setOpenLearnMore] = useState<{ [k: string]: boolean }>({});
@@ -295,8 +295,8 @@ export const UnderstandEarthquakesView: React.FC = () => {
             <span className="font-mono text-cyan-400 font-bold block text-sm">Step 1</span>
             <h4 className="font-semibold text-slate-200">Pre-Event Pass</h4>
             <p className="text-[11px] text-slate-400 leading-normal">
-              Sentinel-1 captures baseline radar scans of the target fault zone during scheduled
-              orbital revisits.
+              SAR missions (Sentinel-1, NISAR, SAOCOM, and RADARSAT) capture baseline radar scans
+              of the target fault zone during scheduled orbital revisits.
             </p>
           </div>
 
@@ -340,6 +340,51 @@ export const UnderstandEarthquakesView: React.FC = () => {
             coverage of the entire fault rupture field that would otherwise require thousands of
             physical GPS stations. Together, they give geologists a complete empirical picture.
           </p>
+        </div>
+
+        {/* Official Earth Observation & SAR Learning Guides */}
+        <div className="pt-2 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-semibold uppercase tracking-wider">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Learn From Official Space Agency SAR Guides</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+            {SAR_OFFICIAL_SOURCES.filter((s) =>
+              [
+                'https://www.earthdata.nasa.gov/learn/earth-observation-data-basics',
+                'https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/sar',
+                'https://www.earthdata.nasa.gov/data/projects/arset',
+                'https://science.nasa.gov/mission/nisar/arcgis-storymaps/',
+                'https://science.nasa.gov/mission/nisar/societal-benefits/',
+                'https://uavsar.jpl.nasa.gov/education/postcards.html',
+                'https://github.com/asc-csa/Synthetic_Aperture_Radar_Tutorial',
+                'https://www.argentina.gob.ar/noticias/la-informacion-saocom-cada-vez-mas-accesible',
+              ].includes(s.url)
+            ).map((src) => (
+              <a
+                key={src.url}
+                href={src.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 bg-slate-900/70 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-lg transition-colors flex flex-col justify-between gap-2 group"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
+                      {src.title}
+                    </span>
+                    <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-cyan-400 shrink-0 mt-0.5" />
+                  </div>
+                  <div className="text-[10px] font-mono text-cyan-400 mt-0.5">
+                    {src.agency} · {src.bandOrFocus}
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">
+                  {src.description}
+                </p>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     </div>

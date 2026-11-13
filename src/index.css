@@ -57,3 +57,27 @@
 .leaflet-control-attribution a:hover {
   text-decoration: underline !important;
 }
+.leaflet-popup.geo-depth-popup .leaflet-popup-content-wrapper {
+  background-color: #0b0e17;
+  color: #f1f5f9;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.75);
+  padding: 0;
+}
+.leaflet-popup.geo-depth-popup .leaflet-popup-content {
+  margin: 14px;
+  min-width: 240px;
+}
+.leaflet-popup.geo-depth-popup .leaflet-popup-tip {
+  background-color: #0b0e17;
+  border: 1px solid #1e293b;
+}
+.leaflet-popup.geo-depth-popup .leaflet-popup-close-button {
+  color: #94a3b8;
+  top: 8px;
+  right: 8px;
+}
+.leaflet-popup.geo-depth-popup .leaflet-popup-close-button:hover {
+  color: #ffffff;
+}

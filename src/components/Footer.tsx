@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
           {/* Col 2: Earth Science & Geodesy Sources */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono mb-3">
-              Earth Science & Geodesy
+              Earth Science &amp; Geodesy
             </h4>
             <ul className="space-y-2">
               <li>
@@ -39,6 +39,36 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
+                  href="https://search.earthdata.nasa.gov/search"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400 transition-colors inline-flex items-center gap-1 text-slate-400 hover:underline"
+                >
+                  NASA Earthdata Search <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://search.asf.alaska.edu/#/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400 transition-colors inline-flex items-center gap-1 text-slate-400 hover:underline"
+                >
+                  ASF Vertex SAR Archive <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://nisar-docs.asf.alaska.edu/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-cyan-400 transition-colors inline-flex items-center gap-1 text-slate-400 hover:underline"
+                >
+                  NASA-ISRO NISAR Docs <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
+              </li>
+              <li>
+                <a
                   href="https://dataspace.copernicus.eu/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -49,22 +79,22 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://aria.jpl.nasa.gov/"
+                  href="https://donnees-data.asc-csa.gc.ca/en/dataset/rcm"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-cyan-400 transition-colors inline-flex items-center gap-1 text-slate-400 hover:underline"
                 >
-                  NASA JPL / Caltech ARIA <ExternalLink className="w-3 h-3 text-slate-400" />
+                  CSA RADARSAT (RCM) <ExternalLink className="w-3 h-3 text-slate-400" />
                 </a>
               </li>
               <li>
                 <a
-                  href="https://asf.alaska.edu/"
+                  href="https://catalogos.conae.gov.ar/catalogo/catalogoSaocomInfo.html"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-cyan-400 transition-colors inline-flex items-center gap-1 text-slate-400 hover:underline"
                 >
-                  Alaska Satellite Facility <ExternalLink className="w-3 h-3 text-slate-400" />
+                  CONAE SAOCOM Catalog <ExternalLink className="w-3 h-3 text-slate-400" />
                 </a>
               </li>
             </ul>

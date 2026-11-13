@@ -12,12 +12,45 @@ import { EarthquakeDetailModal } from './components/EarthquakeDetailModal.tsx';
 import { EarthquakeFeature } from './types/earthquake.ts';
 import { fetchEarthquakeFeed } from './services/earthquakeService.ts';
 
+const VALID_TABS: ActiveTab[] = [
+  'home',
+  'earth-explorer',
+  'earthquakes',
+  'satellite-explorer',
+  'understand-earthquakes',
+  'human-impact',
+  'safety-guide',
+];
+
+function getInitialUrlState(): { tab: ActiveTab; eqId: string | null } {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab') as ActiveTab | null;
+    const eqParam = params.get('eq');
+    const tab = tabParam && VALID_TABS.includes(tabParam)
+      ? tabParam
+      : eqParam
+      ? 'earth-explorer'
+      : 'home';
+    return { tab, eqId: eqParam };
+  } catch {
+    return { tab: 'home', eqId: null };
+  }
+}
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
+  const initialUrl = getInitialUrlState();
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialUrl.tab);
   const [earthquakes, setEarthquakes] = useState<EarthquakeFeature[]>([]);
   const [totalLoadedCount, setTotalLoadedCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedEarthquake, setSelectedEarthquake] = useState<EarthquakeFeature | null>(null);
+
+  // Separate Modal state from Map-Focused state so "View on Earth Explorer" closes the modal and highlights the event on the map
+  const [modalEarthquake, setModalEarthquake] = useState<EarthquakeFeature | null>(null);
+  const [focusedEarthquake, setFocusedEarthquake] = useState<EarthquakeFeature | null>(null);
+  const [pendingEqId, setPendingEqId] = useState<string | null>(initialUrl.eqId);
+  const [focusedEarthquakeError, setFocusedEarthquakeError] = useState<string | null>(null);
 
   // Google Maps Platform Quota Alert state (Tier 2 handling)
   const [quotaExceeded, setQuotaExceeded] = useState(false);
@@ -51,10 +84,91 @@ export default function App() {
     };
   }, []);
 
+  // Resolve pending earthquake ID from URL (?eq=...) once data loads
+  useEffect(() => {
+    if (!pendingEqId || isLoading) return;
+
+    const match = earthquakes.find((item) => item.id === pendingEqId);
+    if (match) {
+      setFocusedEarthquake(match);
+      setFocusedEarthquakeError(null);
+      setPendingEqId(null);
+      return;
+    }
+
+    // Check sessionStorage backup in case the event was loaded from another feed or persisted across refresh
+    try {
+      const savedStr = sessionStorage.getItem('geo_depth_focused_eq');
+      if (savedStr) {
+        const savedEq: EarthquakeFeature = JSON.parse(savedStr);
+        if (savedEq && savedEq.id === pendingEqId) {
+          setFocusedEarthquake(savedEq);
+          setFocusedEarthquakeError(null);
+          setPendingEqId(null);
+          return;
+        }
+      }
+    } catch {
+      // Ignore storage error
+    }
+
+    // Event ID was requested in URL but not found
+    setFocusedEarthquakeError(
+      `Selected earthquake (ID: ${pendingEqId}) could not be found in the current USGS dataset.`
+    );
+    setPendingEqId(null);
+  }, [pendingEqId, isLoading, earthquakes]);
+
+  // Synchronize activeTab & focusedEarthquake ID into URL query parameters
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', activeTab);
+      if (focusedEarthquake && activeTab === 'earth-explorer') {
+        params.set('eq', focusedEarthquake.id);
+      } else if (activeTab !== 'earth-explorer' || !focusedEarthquake) {
+        if (!pendingEqId) {
+          params.delete('eq');
+        }
+      }
+      const queryStr = params.toString();
+      const newUrl = `${window.location.pathname}${queryStr ? `?${queryStr}` : ''}`;
+      window.history.replaceState(null, '', newUrl);
+    } catch {
+      // Ignore history restrictions in sandboxed environments
+    }
+  }, [activeTab, focusedEarthquake, pendingEqId]);
+
+  const handleSelectTab = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    if (tab !== 'earth-explorer') {
+      setFocusedEarthquakeError(null);
+    }
+  };
+
   const handleOpenInMap = (eq: EarthquakeFeature) => {
-    setSelectedEarthquake(eq);
+    setModalEarthquake(null);
+    setFocusedEarthquakeError(null);
+    setPendingEqId(null);
+    setFocusedEarthquake(eq);
+    try {
+      sessionStorage.setItem('geo_depth_focused_eq', JSON.stringify(eq));
+    } catch {
+      // Ignore storage quota
+    }
     setActiveTab('earth-explorer');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleClearFocusedEarthquake = () => {
+    setFocusedEarthquake(null);
+    setFocusedEarthquakeError(null);
+    setPendingEqId(null);
+    try {
+      sessionStorage.removeItem('geo_depth_focused_eq');
+    } catch {
+      // Ignore
+    }
   };
 
   return (
@@ -80,7 +194,7 @@ export default function App() {
       {/* Main Navigation Top Bar */}
       <Navbar
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         earthquakeCount={totalLoadedCount}
       />
 
@@ -90,8 +204,8 @@ export default function App() {
           <HomeView
             recentEarthquakes={earthquakes}
             totalCount={totalLoadedCount}
-            onNavigate={setActiveTab}
-            onSelectEarthquake={setSelectedEarthquake}
+            onNavigate={handleSelectTab}
+            onSelectEarthquake={setModalEarthquake}
           />
         )}
 
@@ -100,8 +214,12 @@ export default function App() {
             earthquakes={earthquakes}
             totalLoadedCount={totalLoadedCount}
             isLoading={isLoading}
-            onSelectEarthquake={setSelectedEarthquake}
-            selectedEarthquake={selectedEarthquake}
+            onOpenAnalysis={setModalEarthquake}
+            focusedEarthquake={focusedEarthquake}
+            onFocusEarthquake={setFocusedEarthquake}
+            onClearFocusedEarthquake={handleClearFocusedEarthquake}
+            focusedEarthquakeError={focusedEarthquakeError}
+            onDismissFocusedError={() => setFocusedEarthquakeError(null)}
           />
         )}
 
@@ -110,7 +228,7 @@ export default function App() {
             earthquakes={earthquakes}
             totalLoadedCount={totalLoadedCount}
             isLoading={isLoading}
-            onSelectEarthquake={setSelectedEarthquake}
+            onSelectEarthquake={setModalEarthquake}
             onOpenMapWithEarthquake={handleOpenInMap}
           />
         )}
@@ -126,8 +244,8 @@ export default function App() {
 
       {/* Reusable Dynamic Earthquake Details Modal */}
       <EarthquakeDetailModal
-        earthquake={selectedEarthquake}
-        onClose={() => setSelectedEarthquake(null)}
+        earthquake={modalEarthquake}
+        onClose={() => setModalEarthquake(null)}
         onOpenInMap={handleOpenInMap}
       />
 
