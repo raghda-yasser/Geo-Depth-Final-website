@@ -4,16 +4,30 @@ import {
   CheckSquare,
   Square,
   HelpCircle,
-  AlertTriangle,
-  Flame,
-  Radio,
   ExternalLink,
   RotateCcw,
   CheckCircle2,
   XCircle,
-  ArrowRight,
-  Package
+  Package,
+  Info,
+  Building2,
+  Trees,
+  Car,
+  GraduationCap,
+  Briefcase,
+  ChevronDown
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  DropIllustration,
+  CoverIllustration,
+  HoldOnIllustration,
+  SituationBuildingIllustration,
+  SituationOutdoorsIllustration,
+  SituationDrivingIllustration,
+  SituationSchoolIllustration,
+  SituationWorkIllustration,
+} from './SafetyIllustrations.tsx';
 
 interface QuizQuestion {
   question: string;
@@ -98,6 +112,124 @@ const EMERGENCY_KIT_ITEMS = [
   { id: 'hygiene', label: 'Sanitation & hygiene supplies (wet wipes, hand sanitizer, heavy trash bags)', category: 'hygiene' }
 ];
 
+interface DropCoverHoldStep {
+  id: 'drop' | 'cover' | 'hold-on';
+  stepNumber: string;
+  title: string;
+  instruction: string;
+  Illustration: React.FC;
+}
+
+const DROP_COVER_HOLD_STEPS: DropCoverHoldStep[] = [
+  {
+    id: 'drop',
+    stepNumber: '01',
+    title: 'DROP',
+    instruction:
+      'Drop immediately onto your hands and knees before strong shaking knocks you down. This position keeps you low and lets you crawl to nearby shelter.',
+    Illustration: DropIllustration,
+  },
+  {
+    id: 'cover',
+    stepNumber: '02',
+    title: 'COVER',
+    instruction:
+      'Crawl underneath a sturdy table or desk and cover the back of your head and neck with your arms. Stay away from glass windows, mirrors, and tall shelves.',
+    Illustration: CoverIllustration,
+  },
+  {
+    id: 'hold-on',
+    stepNumber: '03',
+    title: 'HOLD ON',
+    instruction:
+      'Grip a sturdy leg of your table or desk firmly with one hand while continuing to shield your head and neck with the other arm until shaking completely stops.',
+    Illustration: HoldOnIllustration,
+  },
+];
+
+interface SituationGuidance {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  Illustration: React.FC;
+  steps: string[];
+  avoidNote: string;
+}
+
+const SITUATION_GUIDANCE: SituationGuidance[] = [
+  {
+    id: 'inside-building',
+    title: 'Inside a Building',
+    subtitle: 'What to do during an earthquake indoors',
+    icon: Building2,
+    Illustration: SituationBuildingIllustration,
+    steps: [
+      'Stay indoors until shaking stops and it is safe to exit — do not run outside during shaking.',
+      'Drop to your hands and knees, take Cover under a sturdy desk or against an interior wall away from windows, and Hold On.',
+      'Protect your head and neck from falling ceiling tiles, light fixtures, and heavy furniture.',
+      'If you are in bed, stay there, turn face down, and cover your head and neck with a pillow.',
+    ],
+    avoidNote: 'Do not stand in doorways or use elevators during or immediately after shaking.',
+  },
+  {
+    id: 'outdoors',
+    title: 'Outdoors',
+    subtitle: 'How to stay safe in an open outdoor area',
+    icon: Trees,
+    Illustration: SituationOutdoorsIllustration,
+    steps: [
+      'Move smoothly to a clear, open area away from buildings, brick walls, trees, and streetlights.',
+      'Stay well clear of downed or overhead electrical utility wires and fuel lines.',
+      'Drop low to the ground and shield your head with your arms until the ground stops moving.',
+      'If you are near coastal waters and feel strong or prolonged shaking, move immediately to high ground.',
+    ],
+    avoidNote: 'Avoid sheltering under building awnings, glass facades, balconies, or tall masonry walls.',
+  },
+  {
+    id: 'while-driving',
+    title: 'While Driving',
+    subtitle: 'What to do if an earthquake occurs while driving',
+    icon: Car,
+    Illustration: SituationDrivingIllustration,
+    steps: [
+      'Slow down gradually and pull safely over to the side of the road without blocking emergency lanes.',
+      'Stop clear of bridges, overpasses, underpasses, trees, tall signs, and power lines.',
+      'Engage the parking brake, turn on hazard lights, and remain buckled inside the vehicle.',
+      'After shaking stops, proceed cautiously and avoid damaged roads, ramps, or cracked bridges.',
+    ],
+    avoidNote: 'Do not stop underneath highway overpasses or exit your car near live power lines.',
+  },
+  {
+    id: 'at-school',
+    title: 'At School',
+    subtitle: 'How students and teachers should respond',
+    icon: GraduationCap,
+    Illustration: SituationSchoolIllustration,
+    steps: [
+      'Immediately Drop, Cover under your classroom desk or sturdy table, and Hold On facing away from windows.',
+      'If in a hallway, gymnasium, or cafeteria without desks, crouch against an interior wall and cover your head and neck.',
+      'Listen calmly for teacher instructions once shaking stops before evacuating in an orderly line to the designated assembly field.',
+      'Wait with your class for attendance checks and parent reunification protocols.',
+    ],
+    avoidNote: 'Do not rush for stairwells, exits, or lockers while shaking is still active.',
+  },
+  {
+    id: 'at-work',
+    title: 'At Work',
+    subtitle: 'What employees should do during an earthquake',
+    icon: Briefcase,
+    Illustration: SituationWorkIllustration,
+    steps: [
+      'Drop, Cover beneath a sturdy desk or workbench, and Hold On away from glass partitions, filing cabinets, and server racks.',
+      'If working near machinery, laboratories, or industrial equipment, step clear of unanchored loads and hazardous materials.',
+      'Once shaking stops, check coworkers nearby for injuries and exit via marked emergency stairs — never elevators.',
+      'Follow your workplace floor warden to the outdoor muster point and account for all team members.',
+    ],
+    avoidNote: 'Never re-enter an office or industrial facility until structural safety is cleared.',
+  },
+];
+
 export const SafetyGuideView: React.FC = () => {
   // Checklist State in LocalStorage
   const [checkedKit, setCheckedKit] = useState<{ [id: string]: boolean }>(() => {
@@ -112,6 +244,9 @@ export const SafetyGuideView: React.FC = () => {
   // Quiz State
   const [quizAnswers, setQuizAnswers] = useState<{ [qIdx: number]: number | null }>({});
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
+
+  // Interactive Situations Accordion State (single active item at a time)
+  const [activeSituationId, setActiveSituationId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -141,6 +276,17 @@ export const SafetyGuideView: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-12">
+      {/* Important Note Banner at Top */}
+      <div className="p-3.5 bg-amber-950/35 border border-amber-700/50 rounded-xl flex items-start sm:items-center gap-3 text-xs text-amber-200">
+        <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+        <div>
+          <strong className="font-mono uppercase tracking-wider text-amber-300 mr-1.5">
+            Important Note:
+          </strong>
+          <span>Geo Depth is an educational platform, not an official emergency alert service.</span>
+        </div>
+      </div>
+
       {/* Page Title & Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider font-semibold">
@@ -279,6 +425,163 @@ export const SafetyGuideView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* DROP, COVER, AND HOLD ON — VISUAL ACTION ILLUSTRATIONS */}
+      <section className="bg-[#0b0e17] border border-slate-800 rounded-xl p-6 shadow-xl space-y-5">
+        <div className="border-b border-slate-800 pb-4 space-y-1">
+          <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider font-semibold">
+            Visual Action Guide · During Shaking
+          </div>
+          <h2 className="text-xl font-bold text-slate-100">
+            Drop, Cover, and Hold On
+          </h2>
+          <p className="text-xs text-slate-400">
+            Follow these three immediate physical steps when shaking begins to protect vital organs from falling debris.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {DROP_COVER_HOLD_STEPS.map((step) => {
+            const StepIllustration = step.Illustration;
+            return (
+              <div
+                key={step.id}
+                className="bg-[#0d121d] border border-cyan-500/25 rounded-xl overflow-hidden flex flex-col shadow-lg"
+              >
+                <div className="px-5 pt-4 pb-2 flex items-center justify-between border-b border-slate-800/80">
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-xs font-bold text-cyan-400">{step.stepNumber}</span>
+                    <span className="text-slate-600">·</span>
+                    <h3 className="text-sm font-extrabold text-cyan-300 tracking-wider uppercase">
+                      {step.title}
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono uppercase text-slate-400">
+                    Action Guide
+                  </span>
+                </div>
+
+                <div className="w-full aspect-[400/260] bg-[#090d16] border-b border-slate-800/80 overflow-hidden">
+                  <StepIllustration />
+                </div>
+
+                <div className="p-5 flex-1">
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    {step.instruction}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* NEW INTERACTIVE SECTION: WHAT TO DO IN DIFFERENT SITUATIONS */}
+      <section className="bg-[#0b0e17] border border-slate-800 rounded-xl p-6 shadow-xl space-y-5">
+        <div className="border-b border-slate-800 pb-4 space-y-1">
+          <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider font-semibold">
+            Interactive Scenario Response
+          </div>
+          <h2 className="text-xl font-bold text-slate-100">
+            What To Do in Different Situations
+          </h2>
+          <p className="text-xs text-slate-400">
+            Select a situation below to view clear, practical earthquake safety instructions for your surroundings.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {SITUATION_GUIDANCE.map((situation) => {
+            const IconComponent = situation.icon;
+            const isOpen = activeSituationId === situation.id;
+
+            return (
+              <div
+                key={situation.id}
+                className={`rounded-xl border transition-colors overflow-hidden ${
+                  isOpen
+                    ? 'bg-slate-900/90 border-cyan-500/50 shadow-lg'
+                    : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  onClick={() =>
+                    setActiveSituationId((prev) =>
+                      prev === situation.id ? null : situation.id
+                    )
+                  }
+                  className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-4 transition-colors focus:outline-none"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div
+                      className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
+                        isOpen
+                          ? 'bg-cyan-500/15 border-cyan-400/60 text-cyan-400'
+                          : 'bg-slate-950 border-slate-800 text-slate-300'
+                      }`}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3
+                        className={`text-sm font-bold transition-colors ${
+                          isOpen ? 'text-cyan-300' : 'text-slate-100'
+                        }`}
+                      >
+                        {situation.title}
+                      </h3>
+                      <p className="text-xs text-slate-400 truncate sm:whitespace-normal">
+                        {situation.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180 text-cyan-400' : 'text-slate-400'
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.24, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-5 pt-3 sm:pl-[4.5rem] border-t border-slate-800/80 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+                        <div className="lg:col-span-7 space-y-3">
+                          <ul className="space-y-2 text-xs text-slate-200">
+                            {situation.steps.map((stepText, idx) => (
+                              <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
+                                <span className="font-mono text-cyan-400 font-bold shrink-0">
+                                  0{idx + 1}
+                                </span>
+                                <span>{stepText}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="p-2.5 bg-rose-950/30 border border-rose-900/40 rounded-lg text-[11px] text-rose-300 font-mono">
+                            Avoid: {situation.avoidNote}
+                          </div>
+                        </div>
+
+                        <div className="lg:col-span-5 w-full aspect-[400/260] rounded-xl border border-cyan-500/25 bg-[#090d16] overflow-hidden shadow-inner">
+                          <situation.Illustration />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* INTERACTIVE EMERGENCY KIT CHECKLIST */}
       <section className="bg-[#0b0e17] border border-slate-800 rounded-xl p-6 shadow-xl space-y-5">

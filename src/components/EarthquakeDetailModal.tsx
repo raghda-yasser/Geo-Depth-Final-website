@@ -12,7 +12,9 @@ import {
   ChevronUp,
   Radio,
   FileText,
-  Info
+  Info,
+  Mountain,
+  HeartPulse,
 } from 'lucide-react';
 import { EarthquakeFeature } from '../types/earthquake.ts';
 import { INSAR_CASE_STUDIES } from '../data/insarStudies.ts';
@@ -23,12 +25,16 @@ interface EarthquakeDetailModalProps {
   earthquake: EarthquakeFeature | null;
   onClose: () => void;
   onOpenInMap?: (eq: EarthquakeFeature) => void;
+  onOpenEarthImpact?: (eq: EarthquakeFeature) => void;
+  onOpenHumanImpact?: (eq: EarthquakeFeature) => void;
 }
 
 export const EarthquakeDetailModal: React.FC<EarthquakeDetailModalProps> = ({
   earthquake,
   onClose,
-  onOpenInMap
+  onOpenInMap,
+  onOpenEarthImpact,
+  onOpenHumanImpact,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -496,7 +502,31 @@ export const EarthquakeDetailModal: React.FC<EarthquakeDetailModalProps> = ({
           <div className="text-[11px] text-slate-400 font-mono">
             Verified USGS GeoJSON Data Feed
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {onOpenEarthImpact && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenEarthImpact(earthquake);
+                }}
+                className="px-3.5 py-1.5 text-xs font-medium text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-colors flex items-center gap-1.5 font-semibold"
+              >
+                <Mountain className="w-3.5 h-3.5" />
+                <span>View Earth Impact</span>
+              </button>
+            )}
+            {onOpenHumanImpact && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenHumanImpact(earthquake);
+                }}
+                className="px-3.5 py-1.5 text-xs font-medium text-rose-200 bg-rose-950/90 hover:bg-rose-900 border border-rose-700/80 rounded-md transition-colors flex items-center gap-1.5 font-semibold"
+              >
+                <HeartPulse className="w-3.5 h-3.5" />
+                <span>View Human Impact</span>
+              </button>
+            )}
             {onOpenInMap && (
               <button
                 onClick={() => {

@@ -3,13 +3,13 @@ import {
   Activity,
   Menu,
   X,
-  Compass,
   Globe,
   Satellite,
   Layers,
   HeartPulse,
   ShieldCheck,
   Home,
+  Mountain,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -19,6 +19,7 @@ export type ActiveTab =
   | 'earthquakes'
   | 'satellite-explorer'
   | 'understand-earthquakes'
+  | 'earth-impact'
   | 'human-impact'
   | 'safety-guide';
 
@@ -39,6 +40,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   { id: 'earthquakes', label: 'Earthquakes' },
   { id: 'satellite-explorer', label: 'Satellite Explorer' },
   { id: 'understand-earthquakes', label: 'Understand Earthquakes' },
+  { id: 'earth-impact', label: 'Earth Impact' },
   { id: 'human-impact', label: 'Human Impact' },
   { id: 'safety-guide', label: 'Safety Guide' },
 ];
@@ -196,6 +198,29 @@ const LiveNavIcon: React.FC<{
         </motion.span>
       );
 
+    case 'earth-impact':
+      return (
+        <motion.span
+          className="inline-flex items-center justify-center"
+          animate={
+            isHovered
+              ? { scale: 1.18, y: [0, -2, 0] }
+              : isActive
+              ? { scale: [1, 1.09, 1] }
+              : { scale: 1, y: 0 }
+          }
+          transition={
+            isHovered
+              ? { duration: 0.4, ease: 'easeOut' }
+              : isActive
+              ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }
+              : { duration: 0.2 }
+          }
+        >
+          <Mountain className={iconClass} />
+        </motion.span>
+      );
+
     case 'safety-guide':
       return (
         <motion.span
@@ -225,7 +250,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab, earthqua
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hoveredTab, setHoveredTab] = useState<ActiveTab | null>(null);
   const [brandHovered, setBrandHovered] = useState(false);
-  const [ctaHovered, setCtaHovered] = useState(false);
+  const [logoPulseId, setLogoPulseId] = useState(0);
 
   const handleNavClick = (tab: ActiveTab) => {
     onSelectTab(tab);
@@ -236,54 +261,223 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab, earthqua
   return (
     <header className="sticky top-0 z-40 w-full bg-[#07090e]/95 backdrop-blur-md border-b border-slate-800/80">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 h-16">
-        {/* Zone 1: Brand Wordmark with Live Seismograph Icon */}
+        {/* Zone 1: Interactive Live Geophysical & Orbital Brand Logo */}
         <motion.button
           type="button"
-          onClick={() => handleNavClick('home')}
+          onClick={() => {
+            setLogoPulseId((c) => c + 1);
+            handleNavClick('home');
+          }}
           onMouseEnter={() => setBrandHovered(true)}
           onMouseLeave={() => setBrandHovered(false)}
-          whileTap={{ scale: 0.96 }}
-          className="flex items-center gap-2.5 text-left text-slate-100 whitespace-nowrap shrink-0 group focus:outline-none"
+          whileHover={{ x: 1 }}
+          whileTap={{ scale: 0.94 }}
+          className="flex items-center gap-3 text-left text-slate-100 whitespace-nowrap shrink-0 group focus:outline-none cursor-pointer"
+          aria-label="GEO DEPTH Home"
         >
           <motion.div
             animate={
               brandHovered
-                ? { scale: 1.08, borderColor: 'rgba(34, 211, 238, 0.85)' }
-                : { scale: 1, borderColor: 'rgba(6, 182, 212, 0.35)' }
+                ? {
+                    scale: 1.12,
+                    borderColor: 'rgba(34, 211, 238, 0.95)',
+                    boxShadow: '0 0 24px rgba(34, 211, 238, 0.5)',
+                  }
+                : {
+                    scale: 1,
+                    borderColor: 'rgba(6, 182, 212, 0.45)',
+                    boxShadow: '0 0 14px rgba(6, 182, 212, 0.22)',
+                  }
             }
-            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-            className="relative w-8 h-8 rounded-lg bg-cyan-950/80 border border-cyan-500/35 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.18)] group-hover:shadow-[0_0_18px_rgba(34,211,238,0.45)] transition-shadow overflow-hidden"
+            transition={{ type: 'spring', stiffness: 420, damping: 20 }}
+            className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#081526] via-[#0c1a2e] to-[#05080f] border flex items-center justify-center overflow-visible"
           >
-            {/* Live animated seismograph waveform */}
+            {/* Ambient continuous seismic breathing ring */}
+            <motion.span
+              aria-hidden="true"
+              animate={{
+                scale: brandHovered ? [1, 1.48, 1.55] : [1, 1.28, 1],
+                opacity: brandHovered ? [0.65, 0.15, 0] : [0.35, 0, 0.35],
+              }}
+              transition={{
+                duration: brandHovered ? 1.15 : 2.8,
+                repeat: Infinity,
+                ease: 'easeOut',
+              }}
+              className="absolute inset-0 rounded-xl border border-cyan-400/70 pointer-events-none"
+            />
+
+            {/* Click-triggered shockwave burst */}
+            <AnimatePresence>
+              {logoPulseId > 0 && (
+                <motion.span
+                  key={logoPulseId}
+                  aria-hidden="true"
+                  initial={{ scale: 0.9, opacity: 0.95 }}
+                  animate={{ scale: 1.9, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.65, ease: 'easeOut' }}
+                  className="absolute inset-0 rounded-xl border-2 border-cyan-300 pointer-events-none"
+                />
+              )}
+            </AnimatePresence>
+
+            {/* GEO DEPTH Tectonic Depth Strata + Fault Pulse + Seismic Radiating Core SVG */}
             <svg
-              viewBox="0 0 24 24"
+              viewBox="0 0 40 40"
               fill="none"
-              className="w-5 h-5 stroke-cyan-400"
+              className="w-8 h-8 relative z-10 overflow-visible"
               aria-hidden="true"
             >
-              <motion.path
-                d="M2 12h3.5l2-5.5 3 11 3-8.5 2 5 1.5-2H22"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                initial={{ pathLength: 0.4, pathOffset: 0 }}
+              <defs>
+                <radialGradient id="depthCoreGlow" cx="50%" cy="52%" r="55%">
+                  <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.38" />
+                  <stop offset="65%" stopColor="#0284c7" stopOpacity="0.14" />
+                  <stop offset="100%" stopColor="#082f49" stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="strataStroke" x1="8" y1="14" x2="32" y2="33" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#67e8f9" />
+                  <stop offset="50%" stopColor="#22d3ee" />
+                  <stop offset="100%" stopColor="#0ea5e9" />
+                </linearGradient>
+                <linearGradient id="horizonPulse" x1="6" y1="15" x2="34" y2="15" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.6" />
+                  <stop offset="50%" stopColor="#a5f3fc" />
+                  <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.6" />
+                </linearGradient>
+              </defs>
+
+              {/* Soft subsurface core illumination */}
+              <circle cx="20" cy="21" r="15" fill="url(#depthCoreGlow)" />
+
+              {/* Expanding live P-wave & S-wave seismic ripples from hypocenter */}
+              <motion.circle
+                cx="20"
+                cy="21"
+                stroke="#22d3ee"
+                strokeWidth="1.15"
                 animate={{
-                  pathLength: [0.35, 1, 0.35],
-                  pathOffset: [0, 0.65, 1],
-                  opacity: brandHovered ? 1 : [0.8, 1, 0.8],
+                  r: [4, 15.5],
+                  opacity: [0.75, 0],
                 }}
                 transition={{
-                  duration: brandHovered ? 0.95 : 2.2,
+                  duration: brandHovered ? 1.1 : 2.2,
+                  repeat: Infinity,
+                  ease: 'easeOut',
+                }}
+              />
+              <motion.circle
+                cx="20"
+                cy="21"
+                stroke="#38bdf8"
+                strokeWidth="1"
+                animate={{
+                  r: [4, 15.5],
+                  opacity: [0.6, 0],
+                }}
+                transition={{
+                  duration: brandHovered ? 1.1 : 2.2,
+                  delay: brandHovered ? 0.55 : 1.1,
+                  repeat: Infinity,
+                  ease: 'easeOut',
+                }}
+              />
+
+              {/* Outer geophysical compass/horizon ring */}
+              <circle
+                cx="20"
+                cy="20"
+                r="15.5"
+                stroke="#0ea5e9"
+                strokeOpacity={brandHovered ? 0.85 : 0.45}
+                strokeWidth="1.1"
+                strokeDasharray="6 3"
+              />
+
+              {/* Upper crustal surface + live seismic waveform pulse */}
+              <motion.path
+                d="M7 15.5H14.2L16.8 10.5L20 20.5L23.2 12.2L25.4 15.5H33"
+                stroke="url(#horizonPulse)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={{
+                  pathLength: [0.5, 1, 0.5],
+                  pathOffset: [0, 0.25, 0],
+                }}
+                transition={{
+                  duration: brandHovered ? 0.9 : 2.4,
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
               />
+
+              {/* Subsurface Depth Strata Chevrons (GEO DEPTH signature V-layers) */}
+              <motion.path
+                d="M9.5 22L20 32.5L30.5 22"
+                stroke="url(#strataStroke)"
+                strokeWidth="2.1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={{
+                  y: brandHovered ? [0, 1.5, 0] : 0,
+                  opacity: brandHovered ? 1 : 0.9,
+                }}
+                transition={{
+                  duration: 0.9,
+                  repeat: brandHovered ? Infinity : 0,
+                  ease: 'easeInOut',
+                }}
+              />
+              <motion.path
+                d="M14 23L20 28.8L26 23"
+                stroke="#67e8f9"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={{
+                  opacity: brandHovered ? [0.7, 1, 0.7] : [0.55, 0.9, 0.55],
+                }}
+                transition={{
+                  duration: 1.8,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+
+              {/* Active Hypocenter Focus Beacon */}
+              <motion.circle
+                cx="20"
+                cy="21"
+                fill="#fbbf24"
+                animate={{
+                  r: brandHovered ? [2.1, 3.1, 2.1] : [1.7, 2.4, 1.7],
+                }}
+                transition={{
+                  duration: brandHovered ? 0.75 : 1.7,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+              <circle cx="20" cy="21" r="1" fill="#fef3c7" />
             </svg>
           </motion.div>
-          <div className="flex flex-col">
-            <span className="text-base font-extrabold tracking-wider text-slate-100 font-mono group-hover:text-white transition-colors">
-              GEO<span className="text-cyan-400 font-normal">DEPTH</span>
-            </span>
+
+          <div className="flex flex-col leading-none">
+            <motion.span
+              animate={
+                brandHovered
+                  ? { letterSpacing: '0.14em' }
+                  : { letterSpacing: '0.08em' }
+              }
+              transition={{ duration: 0.25 }}
+              className="text-base font-extrabold text-slate-100 font-mono group-hover:text-white transition-colors"
+            >
+              GEO
+              <span className="text-cyan-400 font-normal group-hover:text-cyan-300 transition-colors">
+                DEPTH
+              </span>
+            </motion.span>
           </div>
         </motion.button>
 
@@ -320,44 +514,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab, earthqua
           })}
         </nav>
 
-        {/* Zone 3: Primary Action & Mobile Menu Toggle */}
+        {/* Zone 3: Mobile Menu Toggle */}
         <div className="flex items-center gap-3 shrink-0">
-          <motion.button
-            type="button"
-            onClick={() => handleNavClick('earth-explorer')}
-            onMouseEnter={() => setCtaHovered(true)}
-            onMouseLeave={() => setCtaHovered(false)}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.96 }}
-            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-slate-900 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-md transition-colors whitespace-nowrap shadow-sm shadow-cyan-950 hover:shadow-[0_0_18px_rgba(34,211,238,0.45)]"
-          >
-            <motion.span
-              className="inline-flex items-center justify-center"
-              animate={
-                ctaHovered
-                  ? { rotate: 180, scale: 1.15 }
-                  : { rotate: [0, 14, -10, 6, 0] }
-              }
-              transition={
-                ctaHovered
-                  ? { duration: 0.45, ease: 'easeOut' }
-                  : { duration: 4.5, repeat: Infinity, ease: 'easeInOut' }
-              }
-            >
-              <Compass className="w-3.5 h-3.5 stroke-[2.3]" />
-            </motion.span>
-            <span>Earth Explorer</span>
-            {earthquakeCount !== undefined && earthquakeCount > 0 && (
-              <motion.span
-                animate={ctaHovered ? { scale: 1.08 } : { scale: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="text-[11px] font-mono font-bold px-1.5 py-0.5 bg-cyan-950 text-cyan-300 rounded ml-0.5 tabular-nums"
-              >
-                {earthquakeCount}
-              </motion.span>
-            )}
-          </motion.button>
-
           <motion.button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

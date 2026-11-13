@@ -8,6 +8,7 @@ import { SatelliteExplorerView } from './components/SatelliteExplorerView.tsx';
 import { UnderstandEarthquakesView } from './components/UnderstandEarthquakesView.tsx';
 import { HumanImpactView } from './components/HumanImpactView.tsx';
 import { SafetyGuideView } from './components/SafetyGuideView.tsx';
+import { EarthImpactView } from './components/EarthImpactView.tsx';
 import { EarthquakeDetailModal } from './components/EarthquakeDetailModal.tsx';
 import { EarthquakeFeature } from './types/earthquake.ts';
 import { fetchEarthquakeFeed } from './services/earthquakeService.ts';
@@ -18,6 +19,7 @@ const VALID_TABS: ActiveTab[] = [
   'earthquakes',
   'satellite-explorer',
   'understand-earthquakes',
+  'earth-impact',
   'human-impact',
   'safety-guide',
 ];
@@ -124,9 +126,13 @@ export default function App() {
     try {
       const params = new URLSearchParams(window.location.search);
       params.set('tab', activeTab);
-      if (focusedEarthquake && activeTab === 'earth-explorer') {
+      const isSyncTab =
+        activeTab === 'earth-explorer' ||
+        activeTab === 'earth-impact' ||
+        activeTab === 'human-impact';
+      if (focusedEarthquake && isSyncTab) {
         params.set('eq', focusedEarthquake.id);
-      } else if (activeTab !== 'earth-explorer' || !focusedEarthquake) {
+      } else if (!isSyncTab || !focusedEarthquake) {
         if (!pendingEqId) {
           params.delete('eq');
         }
@@ -141,34 +147,49 @@ export default function App() {
 
   const handleSelectTab = (tab: ActiveTab) => {
     setActiveTab(tab);
-    if (tab !== 'earth-explorer') {
+    if (tab !== 'earth-explorer' && tab !== 'earth-impact' && tab !== 'human-impact') {
       setFocusedEarthquakeError(null);
+    }
+  };
+
+  const handleSelectSharedEarthquake = (eq: EarthquakeFeature | null) => {
+    setFocusedEarthquakeError(null);
+    setPendingEqId(null);
+    setFocusedEarthquake(eq);
+    try {
+      if (eq) {
+        sessionStorage.setItem('geo_depth_focused_eq', JSON.stringify(eq));
+      } else {
+        sessionStorage.removeItem('geo_depth_focused_eq');
+      }
+    } catch {
+      // Ignore storage quota
     }
   };
 
   const handleOpenInMap = (eq: EarthquakeFeature) => {
     setModalEarthquake(null);
-    setFocusedEarthquakeError(null);
-    setPendingEqId(null);
-    setFocusedEarthquake(eq);
-    try {
-      sessionStorage.setItem('geo_depth_focused_eq', JSON.stringify(eq));
-    } catch {
-      // Ignore storage quota
-    }
+    handleSelectSharedEarthquake(eq);
     setActiveTab('earth-explorer');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenEarthImpact = (eq: EarthquakeFeature) => {
+    setModalEarthquake(null);
+    handleSelectSharedEarthquake(eq);
+    setActiveTab('earth-impact');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenHumanImpact = (eq: EarthquakeFeature) => {
+    setModalEarthquake(null);
+    handleSelectSharedEarthquake(eq);
+    setActiveTab('human-impact');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleClearFocusedEarthquake = () => {
-    setFocusedEarthquake(null);
-    setFocusedEarthquakeError(null);
-    setPendingEqId(null);
-    try {
-      sessionStorage.removeItem('geo_depth_focused_eq');
-    } catch {
-      // Ignore
-    }
+    handleSelectSharedEarthquake(null);
   };
 
   return (
@@ -215,8 +236,10 @@ export default function App() {
             totalLoadedCount={totalLoadedCount}
             isLoading={isLoading}
             onOpenAnalysis={setModalEarthquake}
+            onOpenEarthImpact={handleOpenEarthImpact}
+            onOpenHumanImpact={handleOpenHumanImpact}
             focusedEarthquake={focusedEarthquake}
-            onFocusEarthquake={setFocusedEarthquake}
+            onFocusEarthquake={handleSelectSharedEarthquake}
             onClearFocusedEarthquake={handleClearFocusedEarthquake}
             focusedEarthquakeError={focusedEarthquakeError}
             onDismissFocusedError={() => setFocusedEarthquakeError(null)}
@@ -237,7 +260,27 @@ export default function App() {
 
         {activeTab === 'understand-earthquakes' && <UnderstandEarthquakesView />}
 
-        {activeTab === 'human-impact' && <HumanImpactView />}
+        {activeTab === 'earth-impact' && (
+          <EarthImpactView
+            earthquakes={earthquakes}
+            isLoadingFeed={isLoading}
+            selectedEarthquake={focusedEarthquake}
+            onSelectEarthquake={handleSelectSharedEarthquake}
+            onOpenInMap={handleOpenInMap}
+            onOpenHumanImpact={handleOpenHumanImpact}
+          />
+        )}
+
+        {activeTab === 'human-impact' && (
+          <HumanImpactView
+            earthquakes={earthquakes}
+            isLoadingFeed={isLoading}
+            selectedEarthquake={focusedEarthquake}
+            onSelectEarthquake={handleSelectSharedEarthquake}
+            onOpenEarthImpact={handleOpenEarthImpact}
+            onOpenInMap={handleOpenInMap}
+          />
+        )}
 
         {activeTab === 'safety-guide' && <SafetyGuideView />}
       </main>
@@ -247,6 +290,8 @@ export default function App() {
         earthquake={modalEarthquake}
         onClose={() => setModalEarthquake(null)}
         onOpenInMap={handleOpenInMap}
+        onOpenEarthImpact={handleOpenEarthImpact}
+        onOpenHumanImpact={handleOpenHumanImpact}
       />
 
       {/* Footer on content views */}

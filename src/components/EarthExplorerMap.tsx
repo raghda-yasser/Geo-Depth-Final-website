@@ -25,6 +25,8 @@ interface EarthExplorerMapProps {
   totalLoadedCount: number;
   isLoading: boolean;
   onOpenAnalysis: (eq: EarthquakeFeature) => void;
+  onOpenEarthImpact?: (eq: EarthquakeFeature) => void;
+  onOpenHumanImpact?: (eq: EarthquakeFeature) => void;
   focusedEarthquake: EarthquakeFeature | null;
   onFocusEarthquake: (eq: EarthquakeFeature) => void;
   onClearFocusedEarthquake: () => void;
@@ -168,7 +170,9 @@ function getMagnitudeStyle(mag: number): {
 // Safe DOM Builder for Leaflet Popup Content
 function buildEarthquakePopupElement(
   eq: EarthquakeFeature,
-  onOpenAnalysis: (eq: EarthquakeFeature) => void
+  onOpenAnalysis: (eq: EarthquakeFeature) => void,
+  onOpenEarthImpact?: (eq: EarthquakeFeature) => void,
+  onOpenHumanImpact?: (eq: EarthquakeFeature) => void
 ): HTMLElement {
   const [lng, lat, depth] = eq.geometry.coordinates;
   const mag = eq.properties.mag ?? 0;
@@ -250,9 +254,16 @@ function buildEarthquakePopupElement(
   // Action Buttons Row
   const actionsRow = document.createElement('div');
   actionsRow.style.display = 'flex';
+  actionsRow.style.flexWrap = 'wrap';
   actionsRow.style.alignItems = 'center';
   actionsRow.style.justifyContent = 'space-between';
-  actionsRow.style.gap = '8px';
+  actionsRow.style.gap = '6px';
+
+  const leftBtns = document.createElement('div');
+  leftBtns.style.display = 'flex';
+  leftBtns.style.flexWrap = 'wrap';
+  leftBtns.style.alignItems = 'center';
+  leftBtns.style.gap = '6px';
 
   const analysisBtn = document.createElement('button');
   analysisBtn.type = 'button';
@@ -266,7 +277,41 @@ function buildEarthquakePopupElement(
   analysisBtn.style.border = 'none';
   analysisBtn.style.cursor = 'pointer';
   analysisBtn.onclick = () => onOpenAnalysis(eq);
-  actionsRow.appendChild(analysisBtn);
+  leftBtns.appendChild(analysisBtn);
+
+  if (onOpenEarthImpact) {
+    const impactBtn = document.createElement('button');
+    impactBtn.type = 'button';
+    impactBtn.textContent = 'View Earth Impact';
+    impactBtn.style.backgroundColor = '#083344';
+    impactBtn.style.color = '#67e8f9';
+    impactBtn.style.fontWeight = '700';
+    impactBtn.style.fontSize = '11px';
+    impactBtn.style.padding = '5px 9px';
+    impactBtn.style.borderRadius = '6px';
+    impactBtn.style.border = '1px solid #0e7490';
+    impactBtn.style.cursor = 'pointer';
+    impactBtn.onclick = () => onOpenEarthImpact(eq);
+    leftBtns.appendChild(impactBtn);
+  }
+
+  if (onOpenHumanImpact) {
+    const humanBtn = document.createElement('button');
+    humanBtn.type = 'button';
+    humanBtn.textContent = 'View Human Impact';
+    humanBtn.style.backgroundColor = '#4c0519';
+    humanBtn.style.color = '#fda4af';
+    humanBtn.style.fontWeight = '700';
+    humanBtn.style.fontSize = '11px';
+    humanBtn.style.padding = '5px 9px';
+    humanBtn.style.borderRadius = '6px';
+    humanBtn.style.border = '1px solid #be123c';
+    humanBtn.style.cursor = 'pointer';
+    humanBtn.onclick = () => onOpenHumanImpact(eq);
+    leftBtns.appendChild(humanBtn);
+  }
+
+  actionsRow.appendChild(leftBtns);
 
   if (eq.properties.url) {
     const usgsLink = document.createElement('a');
@@ -323,6 +368,8 @@ export const EarthExplorerMap: React.FC<EarthExplorerMapProps> = ({
   totalLoadedCount,
   isLoading,
   onOpenAnalysis,
+  onOpenEarthImpact,
+  onOpenHumanImpact,
   focusedEarthquake,
   onFocusEarthquake,
   onClearFocusedEarthquake,
@@ -550,10 +597,13 @@ export const EarthExplorerMap: React.FC<EarthExplorerMapProps> = ({
       });
 
       // Click Popup with Magnitude, Location, Depth, Date/Time, Coords, USGS Link & Full Analysis
-      circle.bindPopup(() => buildEarthquakePopupElement(eq, onOpenAnalysis), {
-        className: 'geo-depth-popup',
-        maxWidth: 300,
-      });
+      circle.bindPopup(
+        () => buildEarthquakePopupElement(eq, onOpenAnalysis, onOpenEarthImpact, onOpenHumanImpact),
+        {
+          className: 'geo-depth-popup',
+          maxWidth: 340,
+        }
+      );
 
       circle.on('click', () => {
         onFocusEarthquake(eq);
@@ -569,6 +619,8 @@ export const EarthExplorerMap: React.FC<EarthExplorerMapProps> = ({
     focusedEarthquake,
     mapReady,
     onOpenAnalysis,
+    onOpenEarthImpact,
+    onOpenHumanImpact,
     onFocusEarthquake,
   ]);
 
@@ -1038,13 +1090,29 @@ export const EarthExplorerMap: React.FC<EarthExplorerMapProps> = ({
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-800">
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-800">
             <button
               onClick={() => onOpenAnalysis(focusedEarthquake)}
               className="px-2.5 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-[11px] rounded transition-colors"
             >
               Open Full Analysis
             </button>
+            {onOpenEarthImpact && (
+              <button
+                onClick={() => onOpenEarthImpact(focusedEarthquake)}
+                className="px-2.5 py-1 bg-cyan-950 hover:bg-cyan-900 border border-cyan-600/60 text-cyan-300 font-semibold text-[11px] rounded transition-colors"
+              >
+                View Earth Impact
+              </button>
+            )}
+            {onOpenHumanImpact && (
+              <button
+                onClick={() => onOpenHumanImpact(focusedEarthquake)}
+                className="px-2.5 py-1 bg-rose-950 hover:bg-rose-900 border border-rose-600/60 text-rose-300 font-semibold text-[11px] rounded transition-colors"
+              >
+                View Human Impact
+              </button>
+            )}
             <button
               onClick={() => {
                 const map = mapInstanceRef.current;

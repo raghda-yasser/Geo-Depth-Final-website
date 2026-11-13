@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { INSAR_CASE_STUDIES } from '../data/insarStudies.ts';
 import { SAR_OFFICIAL_SOURCES, SAR_SOURCE_CATEGORIES } from '../data/sarSources.ts';
+import { SarInteractiveLab } from './SarInteractiveLab.tsx';
 
 export const SatelliteExplorerView: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string>(INSAR_CASE_STUDIES[0].id);
@@ -84,6 +85,9 @@ export const SatelliteExplorerView: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Interactive 3D SAR Scientific Visualization & Surface Scattering Lab */}
+      <SarInteractiveLab />
 
       {/* Critical Scientific Taxonomy: Distinguishing Satellite Products */}
       <div className="p-5 bg-[#0e1320] border border-slate-800 rounded-xl space-y-4">
